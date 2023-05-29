@@ -1,6 +1,7 @@
 import {
   BrowserRouter,
   createBrowserRouter,
+  Outlet,
   Route,
   Routes,
 } from "react-router-dom";
@@ -8,6 +9,9 @@ import React, { useEffect, useState } from "react";
 import MainLayout from "./components/layout/MainLayout";
 import { routes } from "./routes";
 import SignInPage from "./pages/logIn/LogInPage";
+import Sidebar from "./components/common/sidebars/Sidebar";
+import Container from "@mui/material/Container";
+import SidebarNav from "./components/common/sidebars/SidebarNav";
 
 function App() {
   // const router = createBrowserRouter([]);
@@ -21,17 +25,11 @@ function App() {
     }
   }, [token]);
 
-  return (
-    <BrowserRouter>
-      <Routes>
-        {!token ? (
-          <Route path="/signIn" element={<SignInPage setToken={setToken} />} />
-        ) : (
-          <Route element={<MainLayout />}>{routes}</Route>
-        )}
-      </Routes>
-    </BrowserRouter>
-  );
+  if (!token) {
+    return <SignInPage setToken={setToken} />;
+  }
+
+  return <MainLayout setToken={setToken} />;
 }
 
 export default App;

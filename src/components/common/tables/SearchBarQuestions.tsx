@@ -1,13 +1,18 @@
 import { Autocomplete, InputAdornment, TextField } from "@mui/material";
 import React, { useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
-import { QuestionType, TagType, UserType } from "../types/DataTypes";
+import {
+  QuestionType,
+  QuestionTypeSearchBar,
+  TagType,
+  UserType,
+} from "../types/DataTypes";
 
 interface SearchBarProps {
-  questions: QuestionType[];
+  questions: any[];
   setCurrentQuestions: (value: any) => void;
   tags: TagType[];
-  users: UserType[];
+  users: any[];
 }
 const SearchBarQuestions = ({
   questions,
@@ -17,18 +22,17 @@ const SearchBarQuestions = ({
 }: SearchBarProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState<TagType | null>(null);
-  const [selectedUsers, setSelectedUsers] = useState<UserType[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<UserType>();
 
   const handleChangeDropdownTag = (newValue: TagType | null) => {
     let searchedQuestions = questions;
 
     if (newValue) {
       searchedQuestions = questions.filter((question) => {
-        return question.tags.some((tag) => tag.tagId === newValue.tagId);
+        return question.tags.some((tag: any) => tag.id === newValue.id);
       });
     }
 
-    console.log("searcherQuestions----->", searchedQuestions);
     setCurrentQuestions(searchedQuestions);
     setSelectedTag(newValue);
   };
@@ -36,10 +40,10 @@ const SearchBarQuestions = ({
   const handleChangeDropdownUsers = (newValue: any) => {
     let searchedQuestions = questions;
 
-    if (newValue.length > 0) {
-      searchedQuestions = questions.filter((question) => {
-        return newValue.some((user: any) => question.creator.id === user.id);
-      });
+    if (newValue) {
+      searchedQuestions = questions.filter(
+        (question) => question.creator.id === newValue.userId
+      );
     }
 
     setCurrentQuestions(searchedQuestions);
@@ -53,8 +57,8 @@ const SearchBarQuestions = ({
       setCurrentQuestions(questions);
     } else {
       const searchedQuestions = questions.filter((question) => {
-        const questionTags = question.tags.map((tag) => tag.name);
-        const includesTag = questionTags.some((tagName) =>
+        const questionTags = question.tags.map((tag: any) => tag.name);
+        const includesTag = questionTags.some((tagName: any) =>
           tagName.includes(searchedString)
         );
         const includesTitle = question.title.includes(searchedString);
@@ -65,9 +69,6 @@ const SearchBarQuestions = ({
   };
 
   const renderUserLabel = (user: UserType) => {
-    //TODO AFTER IMPLEMENTING AUTH AND STORING CURRENT USER
-    //const isCurrentUser =
-
     return `${user.firstName} ${user.lastName}`;
   };
 
@@ -118,7 +119,6 @@ const SearchBarQuestions = ({
           sx={{ flexGrow: "1", width: "120px" }}
           options={users}
           getOptionLabel={(option: UserType) => renderUserLabel(option)}
-          multiple
           value={selectedUsers}
           onChange={(event: any, newValue: any) =>
             handleChangeDropdownUsers(newValue)

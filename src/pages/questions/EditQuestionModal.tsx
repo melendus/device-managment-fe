@@ -1,21 +1,27 @@
 import React, { useEffect, useState } from "react";
 import {
-  Autocomplete,
   Box,
-  Button,
   Modal,
-  TextField,
   Typography,
+  TextField,
+  Button,
+  Autocomplete,
 } from "@mui/material";
 import {
   AddQuestionType,
   QuestionType,
+  TagType,
 } from "../../components/common/types/DataTypes";
 // @ts-ignore
 import FileBase64 from "react-file-base64";
 import { useAppSelector } from "../../hooks/hooks";
-import { saveQuestion } from "../../services/QuestionApi";
-import { addTags, getAllTags } from "../../services/TagApi";
+import { saveQuestion, updateQuestionById } from "../../services/QuestionApi";
+import {
+  addTags,
+  deleteAllQuestionTags,
+  getAllTags,
+  getTagsByQuestionId,
+} from "../../services/TagApi";
 
 const style = {
   position: "absolute" as "absolute",
@@ -28,26 +34,39 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-interface AddQuestionProps {
+interface EditQuestionProps {
   handleClose: () => void;
   isOpen: boolean;
-  questions: QuestionType[];
-  setQuestions: React.Dispatch<React.SetStateAction<QuestionType[]>>;
+  question: any;
+  setQuestion: React.Dispatch<React.SetStateAction<any>>;
 }
 
-const mockTags: string[] = ["C++", "React", "Spring"];
+const mockTags: TagType[] = [
+  {
+    id: Math.random() * 1000,
+    name: "C++",
+  },
+  {
+    id: Math.random() * 1000,
+    name: "React",
+  },
+  {
+    id: Math.random() * 1000,
+    name: "Spring",
+  },
+];
 
-const AddQuestionModal = ({
+const EditQuestionModal = ({
   handleClose,
   isOpen,
-  questions,
-  setQuestions,
-}: AddQuestionProps) => {
+  question,
+  setQuestion,
+}: EditQuestionProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [picture, setPicture] = useState("");
   const [tags, setTags] = useState(mockTags);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<[]>([]);
   const currentUser = useAppSelector((state) => state.currentUser);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -58,17 +77,30 @@ const AddQuestionModal = ({
       picture,
     };
 
-    const returnedQuestion = await saveQuestion({
-      userId: currentUser.userId,
-      ...questionToBeAdded,
+    const newQuestion = { ...question };
+    newQuestion.title = questionToBeAdded.title;
+    newQuestion.description = questionToBeAdded.description;
+    newQuestion.picture = questionToBeAdded.picture;
+    await updateQuestionById({
+      id: currentUser.userId,
+      ...newQuestion,
     });
 
-    returnedQuestion.data.tags = await addTags({
+    const questionTags = await getTagsByQuestionId(question.id);
+
+    const tagIds = questionTags.data.map((tag: any) => tag.id);
+
+    await deleteAllQuestionTags({
+      tagsIds: tagIds,
+      questionId: question.id,
+    });
+
+    newQuestion.tags = await addTags({
       tags: selectedTags,
-      questionId: returnedQuestion.data.id,
+      questionId: newQuestion.id,
     });
-
-    setQuestions([returnedQuestion.data, ...questions]);
+    console.log("newQuestion---->", newQuestion);
+    setQuestion(newQuestion);
     handleClose();
   };
 
@@ -90,10 +122,7 @@ const AddQuestionModal = ({
   useEffect(() => {
     const fetchTags = async () => {
       const res = await getAllTags();
-      let tags;
-      if (res.data !== "") {
-        tags = res.data.map((tag: any) => tag.name);
-      }
+      const tags = res.data.map((tag: any) => tag.name);
 
       setTags(tags);
     };
@@ -109,7 +138,7 @@ const AddQuestionModal = ({
     >
       <Box sx={style}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
-          Add question
+          Edit Question
         </Typography>
         <Typography id="modal-modal-description" sx={{ mt: 2 }}>
           Please fill the information for your question!
@@ -159,4 +188,4 @@ const AddQuestionModal = ({
   );
 };
 
-export default AddQuestionModal;
+export default EditQuestionModal;

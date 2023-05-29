@@ -27,21 +27,6 @@ interface EditProfileProps {
   isOpen: boolean;
 }
 
-const mockTags: TagType[] = [
-  {
-    tagId: Math.random() * 1000,
-    name: "C++",
-  },
-  {
-    tagId: Math.random() * 1000,
-    name: "React",
-  },
-  {
-    tagId: Math.random() * 1000,
-    name: "Spring",
-  },
-];
-
 const EditProfileModal = ({ handleClose, isOpen }: EditProfileProps) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");

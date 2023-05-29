@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { UserType } from "../../components/common/types/DataTypes";
 
 const initialState: UserType = {
-  id: -1,
+  userId: -1,
   role: "",
   email: "",
   firstName: "",

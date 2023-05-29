@@ -1,21 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
-  Autocomplete,
   Box,
-  Button,
   Modal,
-  TextField,
   Typography,
+  TextField,
+  Button,
+  Autocomplete,
 } from "@mui/material";
-import {
-  AddQuestionType,
-  QuestionType,
-} from "../../components/common/types/DataTypes";
+import { AddAnswerType } from "../../components/common/types/DataTypes";
 // @ts-ignore
 import FileBase64 from "react-file-base64";
 import { useAppSelector } from "../../hooks/hooks";
-import { saveQuestion } from "../../services/QuestionApi";
-import { addTags, getAllTags } from "../../services/TagApi";
+import { addQuestionAnswer } from "../../services/AnswersApi";
 
 const style = {
   position: "absolute" as "absolute",
@@ -28,77 +24,55 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-interface AddQuestionProps {
+interface EditQuestionProps {
   handleClose: () => void;
   isOpen: boolean;
-  questions: QuestionType[];
-  setQuestions: React.Dispatch<React.SetStateAction<QuestionType[]>>;
+  answers: any;
+  setAnswers: React.Dispatch<React.SetStateAction<any>>;
 }
 
-const mockTags: string[] = ["C++", "React", "Spring"];
-
-const AddQuestionModal = ({
+const AddAnswerModal = ({
   handleClose,
   isOpen,
-  questions,
-  setQuestions,
-}: AddQuestionProps) => {
+  answers,
+  setAnswers,
+}: EditQuestionProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [picture, setPicture] = useState("");
-  const [tags, setTags] = useState(mockTags);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const currentUser = useAppSelector((state) => state.currentUser);
+  const currentQuestion = useAppSelector((state) => state.currentQuestion);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const questionToBeAdded: AddQuestionType = {
+    const answerToBeAdded: AddAnswerType = {
       title,
       description,
       picture,
     };
 
-    const returnedQuestion = await saveQuestion({
-      userId: currentUser.userId,
-      ...questionToBeAdded,
-    });
+    const newAnswer = {
+      title: answerToBeAdded.title,
+      description: answerToBeAdded.description,
+      picture: answerToBeAdded.picture,
+    };
 
-    returnedQuestion.data.tags = await addTags({
-      tags: selectedTags,
-      questionId: returnedQuestion.data.id,
-    });
+    console.log(
+      "ceva---->",
+      currentQuestion.id.toString(),
+      currentUser.userId.toString(),
+      newAnswer
+    );
 
-    setQuestions([returnedQuestion.data, ...questions]);
+    const returnedAnswer = await addQuestionAnswer(
+      currentQuestion.id.toString(),
+      currentUser.userId.toString(),
+      newAnswer
+    );
+
+    setAnswers([returnedAnswer.data, ...answers]);
     handleClose();
   };
-
-  const renderTag = (tag: any) => {
-    if (tag !== null) {
-      return tag;
-    } else {
-      return "";
-    }
-  };
-
-  const handleChangeDropdownTag = (
-    event: React.ChangeEvent<{}>,
-    newValue: any
-  ) => {
-    setSelectedTags(newValue);
-  };
-
-  useEffect(() => {
-    const fetchTags = async () => {
-      const res = await getAllTags();
-      let tags;
-      if (res.data !== "") {
-        tags = res.data.map((tag: any) => tag.name);
-      }
-
-      setTags(tags);
-    };
-    fetchTags();
-  }, []);
 
   return (
     <Modal
@@ -109,7 +83,7 @@ const AddQuestionModal = ({
     >
       <Box sx={style}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
-          Add question
+          Edit Question
         </Typography>
         <Typography id="modal-modal-description" sx={{ mt: 2 }}>
           Please fill the information for your question!
@@ -130,19 +104,7 @@ const AddQuestionModal = ({
             fullWidth
             multiline
             required
-            sx={{ mt: 2 }}
-          />
-          <Autocomplete
-            sx={{ flexGrow: "1", mt: 2, mb: 2 }}
-            options={tags}
-            getOptionLabel={(option) => renderTag(option)}
-            multiple
-            freeSolo
-            value={selectedTags}
-            onChange={handleChangeDropdownTag}
-            renderInput={(params) => (
-              <TextField {...params} label="Tags" variant="outlined" />
-            )}
+            sx={{ mt: 2, mb: 2 }}
           />
           <div style={{ paddingBottom: "5px" }}>
             <FileBase64
@@ -159,4 +121,4 @@ const AddQuestionModal = ({
   );
 };
 
-export default AddQuestionModal;
+export default AddAnswerModal;

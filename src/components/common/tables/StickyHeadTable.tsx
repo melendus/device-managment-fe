@@ -7,14 +7,16 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
-import { Chip } from "@mui/material";
-import { useState } from "react";
-import SearchBar from "./SearchBar";
+import { useEffect, useState } from "react";
 import { UserType } from "../types/DataTypes";
 import { useNavigate } from "react-router-dom";
+import { getAllUsers, updateUser } from "../../../services/UserApi";
+import { Button } from "@mui/material";
+import { useAppSelector } from "../../../hooks/hooks";
+import { banUser } from "../../../services/AdminApi";
 
 interface Column {
-  id: "firstName" | "lastName" | "score" | "email";
+  id: "firstName" | "lastName" | "score" | "email" | "button";
   label: string;
   minWidth?: number;
   align?: "right";
@@ -31,10 +33,11 @@ const columns: readonly Column[] = [
     minWidth: 100,
     align: "right",
   },
+  { id: "button", label: "", minWidth: 50 },
 ];
 
 const creator: UserType = {
-  id: Math.random() * 1000,
+  userId: Math.random() * 1000,
   firstName: "Stefan",
   lastName: "CEl mare",
   role: "user",
@@ -72,9 +75,23 @@ const getText = (fieldName: string, value: any) => {
 export default function StickyHeadTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [rows, setRows] = useState<UserType[]>(originalRows);
-  const [filteredRows, setFilteredRows] = useState<UserType[]>(originalRows);
-  const [searched, setSearched] = useState<string>("");
+  const [rows, setRows] = useState<any[]>(originalRows);
+
+  const currentUser = useAppSelector((state) => state.currentUser);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const res = await getAllUsers();
+      console.log("users--->", res.data);
+      setRows(res.data);
+    };
+    fetchUsers();
+  }, []);
+
+  const onBanHandle = async (user: any) => {
+    const res = await banUser(user);
+    console.log("res---->", res);
+  };
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -91,12 +108,6 @@ export default function StickyHeadTable() {
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
-      {/*<SearchBar*/}
-      {/*  questions={rows}*/}
-      {/*  setCurrentQuestions={setFilteredRows}*/}
-      {/*  users={userArray}*/}
-      {/*  tags={tags}*/}
-      {/*/>*/}
       <TableContainer>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
@@ -113,7 +124,7 @@ export default function StickyHeadTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredRows
+            {rows
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row, index) => {
                 return (
@@ -122,13 +133,28 @@ export default function StickyHeadTable() {
                     role="checkbox"
                     tabIndex={-1}
                     key={index}
-                    onClick={() => {
-                      navigate("/userProfile");
-                    }}
+                    onClick={() => {}}
                     sx={{ cursor: "pointer" }}
                   >
                     {columns.map((column) => {
                       const value = row[column.id];
+                      if (column.id === "button") {
+                        return (
+                          <TableCell
+                            key={column.id}
+                            align={column.align}
+                            style={{
+                              height: "65px",
+                            }}
+                          >
+                            {currentUser.role === "admin" && (
+                              <Button onClick={() => onBanHandle(row)}>
+                                BAN
+                              </Button>
+                            )}
+                          </TableCell>
+                        );
+                      }
                       return (
                         <TableCell
                           key={column.id}

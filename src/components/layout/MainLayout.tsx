@@ -5,8 +5,12 @@ import sizeConfigs from "../../configs/sizeConfigs";
 import colorConfigs from "../../configs/colorConfigs";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../common/sidebars/Sidebar";
+import SidebarNav from "../common/sidebars/SidebarNav";
 
-const MainLayout = () => {
+interface MainLayoutProps {
+  setToken: (value: any) => void;
+}
+const MainLayout = ({ setToken }: MainLayoutProps) => {
   return (
     <Box sx={{ display: "flex" }}>
       <Topbar />
@@ -17,14 +21,14 @@ const MainLayout = () => {
           flexShrink: 0,
         }}
       >
-        <Sidebar />
+        <SidebarNav setToken={setToken} />
       </Box>
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
-          width: `calc(100% - ${sizeConfigs.sidebar.width})`,
+          width: `100%`,
           minHeight: "100vh",
           backgroundColor: colorConfigs.mainBg,
         }}

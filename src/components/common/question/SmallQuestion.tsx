@@ -7,13 +7,11 @@ import Typography from "@mui/material/Typography";
 import { red } from "@mui/material/colors";
 import { Chip, Grid, IconButton, Stack } from "@mui/material";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
-import { Question } from "./config";
-import Vote from "./Vote";
 import styled from "styled-components";
-import colorConfigs from "../../../configs/colorConfigs";
 import { QuestionType } from "../types/DataTypes";
+import { useAppDispatch } from "../../../hooks/hooks";
+import { updateQuestion } from "../../../redux/slices/QuestionSlice";
 
 const Header = styled.h1`
   font-size: 20px;
@@ -39,8 +37,17 @@ interface QuestionProps {
 const questionScore = 50;
 
 const SmallQuestion = ({ question }: QuestionProps) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const onClickHandle = () => {
+    dispatch(
+      updateQuestion({
+        id: question.id,
+      })
+    );
+    navigate("/question");
+  };
 
   const date = new Date(question.createdAt);
 
@@ -66,10 +73,7 @@ const SmallQuestion = ({ question }: QuestionProps) => {
                 </HeaderContainer>
               }
               action={
-                <IconButton
-                  aria-label="settings"
-                  onClick={() => navigate("/question")}
-                >
+                <IconButton aria-label="settings" onClick={onClickHandle}>
                   <KeyboardArrowRightIcon />
                 </IconButton>
               }

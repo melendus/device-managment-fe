@@ -49,7 +49,13 @@ const Sidebar = (props: Props) => {
         </Toolbar>
         <div style={{ display: "flex", flexDirection: "column" }}>
           {appRoutes.map((route, index) => (
-            <SidebarItem item={route} key={index} />
+            <SidebarItem
+              item={route}
+              key={index}
+              onClick={() => {
+                console.log("caca");
+              }}
+            />
           ))}
         </div>
       </List>

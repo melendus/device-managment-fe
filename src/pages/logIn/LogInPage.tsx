@@ -21,7 +21,6 @@ interface SignInProps {
 }
 
 const SignInPage = ({ setToken }: SignInProps) => {
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -32,7 +31,6 @@ const SignInPage = ({ setToken }: SignInProps) => {
     });
     const status = localStorage.getItem("loggedIn");
     if (status === "true") {
-      navigate("/dashboard");
       setToken(localStorage.getItem("token"));
       console.log("response.data-----?", response);
       const user = response.user;

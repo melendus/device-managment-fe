@@ -13,3 +13,7 @@ userApi.interceptors.request.use((config) => {
 export const getAllUsers = () => {
   return userApi.get("/getAll");
 };
+
+export const updateUser = (user: any) => {
+  return userApi.put("/updateUser", user);
+};

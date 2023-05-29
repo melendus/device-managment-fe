@@ -7,6 +7,7 @@ export interface QuestionType {
   createdAt: string;
   updatedAt: string;
   creator: UserType;
+  id: number;
 }
 
 export interface AddQuestionType {
@@ -15,8 +16,14 @@ export interface AddQuestionType {
   picture: string;
 }
 
+export interface AddAnswerType {
+  title: string;
+  description: string;
+  picture: string;
+}
+
 export interface UserType {
-  id: Number;
+  userId: Number;
 
   firstName: string;
   lastName: string;
@@ -28,7 +35,28 @@ export interface UserType {
   banned?: boolean;
   votes?: [];
 }
+
+export interface QuestionTypeSearchBar {
+  title: string;
+  description: string;
+  tags: TagType[];
+  createdAt: string;
+  updatedAt: string;
+  creator: {
+    id: Number;
+    firstName: string;
+    lastName: string;
+    role: string;
+    createdAt?: Date;
+    email: string;
+    phoneNumber?: string;
+    score?: number;
+    banned?: boolean;
+    votes?: [];
+  };
+  id: number;
+}
 export interface TagType {
-  tagId: Number;
+  id: Number;
   name: string;
 }

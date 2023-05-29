@@ -3,7 +3,11 @@ import styled, { keyframes } from "styled-components";
 import colorConfigs from "../../../configs/colorConfigs";
 import { useAppSelector } from "../../../hooks/hooks";
 import { getAllVotes, getVote } from "../../../services/VoteQuestionApi";
-import { voteQuestion } from "../../../services/QuestionApi";
+import {
+  getAllVotesAnswer,
+  getVoteAnswer,
+} from "../../../services/VoteAnswerApi";
+import { voteAnswer, voteQuestion } from "../../../services/QuestionApi";
 
 const pulseAnimation = keyframes`
   0%,
@@ -74,28 +78,34 @@ const ButtonWrapper = styled.div`
     }
   }
 `;
-interface VoteProps {
-  question: any;
+
+interface VoteAnswerProps {
+  answer: any;
 }
-const Vote = ({ question }: VoteProps) => {
+const VoteAnswer = ({ answer }: VoteAnswerProps) => {
   const [count, setCount] = useState(0);
+
   const [currentUserVoteValue, setCurrentUserVoteValue] = useState(0);
 
   const currentUser = useAppSelector((state) => state.currentUser);
 
   useEffect(() => {
     const fetchNumberOfVotes = async () => {
-      const res = await getAllVotes(question.id);
+      if (answer.answerId === -1) {
+        return;
+      }
+      const res = await getAllVotesAnswer(answer.answerId);
       if (res.data === "") {
         setCount(0);
       } else {
         setCount(res.data);
       }
 
-      const currentUserVote = await getVote(
+      const currentUserVote = await getVoteAnswer(
         currentUser.userId.toString(),
-        question.id
+        answer.answerId
       );
+
       if (currentUserVote.data == "") {
         setCurrentUserVoteValue(0);
       } else if (currentUserVote.data.value === 1) {
@@ -107,45 +117,43 @@ const Vote = ({ question }: VoteProps) => {
       }
     };
     fetchNumberOfVotes();
-  }, [currentUserVoteValue, question]);
+  }, [currentUserVoteValue, answer]);
 
   const onClickUp = async () => {
-    await voteQuestion({
+    await voteAnswer({
       userId: currentUser.userId.toString(),
-      questionId: question.id,
+      answerId: answer.answerId,
       value: 1,
     });
     setCurrentUserVoteValue(1);
   };
 
   const onClickDown = async () => {
-    await voteQuestion({
+    await voteAnswer({
       userId: currentUser.userId.toString(),
-      questionId: question.id,
+      answerId: answer.answerId,
       value: -1,
     });
     if (currentUserVoteValue === 1) {
-      await voteQuestion({
+      await voteAnswer({
         userId: currentUser.userId.toString(),
-        questionId: question.id,
+        answerId: answer.answerId,
         value: 0,
       });
       setCurrentUserVoteValue(0);
     } else if (currentUserVoteValue === 0) {
-      await voteQuestion({
+      await voteAnswer({
         userId: currentUser.userId.toString(),
-        questionId: question.id,
+        answerId: answer.answerId,
         value: -1,
       });
       setCurrentUserVoteValue(-1);
     }
   };
 
-  console.log(currentUserVoteValue === 1);
-
   return (
     <Container>
-      <ButtonWrapper aria-disabled={currentUserVoteValue === 1}>
+      <ButtonWrapper>
         {currentUserVoteValue !== 1 && (
           <button onClick={() => onClickUp()}>+</button>
         )}
@@ -162,4 +170,4 @@ const Vote = ({ question }: VoteProps) => {
   );
 };
 
-export default Vote;
+export default VoteAnswer;

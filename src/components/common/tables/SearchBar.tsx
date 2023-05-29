@@ -22,7 +22,9 @@ const SearchBar = ({
 
     if (newValue.length > 0) {
       searchedQuestions = questions.filter((question) => {
-        return newValue.some((user: any) => question.creator.id === user.id);
+        return newValue.some(
+          (user: any) => question.creator.userId === user.id
+        );
       });
     }
 

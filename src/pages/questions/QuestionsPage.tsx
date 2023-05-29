@@ -11,9 +11,11 @@ import { Button, Grid, Paper } from "@mui/material";
 import AddQuestionModal from "./AddQuestionModal";
 import SearchBarQuestions from "../../components/common/tables/SearchBarQuestions";
 import { getAllQuestions } from "../../services/QuestionApi";
+import { getAllTags } from "../../services/TagApi";
+import { getAllUsers } from "../../services/UserApi";
 
 const creator: UserType = {
-  id: Math.random() * 1000,
+  userId: Math.random() * 1000,
   firstName: "Stefan",
   lastName: "CEl mare",
   role: "user",
@@ -22,7 +24,7 @@ const creator: UserType = {
 };
 
 const creator2: UserType = {
-  id: Math.random() * 1000,
+  userId: Math.random() * 1000,
   firstName: "Ali",
   lastName: "Baba",
   role: "user",
@@ -32,113 +34,28 @@ const creator2: UserType = {
 
 const creators = [creator, creator2];
 
-const tags: TagType[] = [
+const mockTags: TagType[] = [
   {
-    tagId: Math.random() * 1000,
+    id: Math.random() * 1000,
     name: "C++",
   },
   {
-    tagId: Math.random() * 1000,
+    id: Math.random() * 1000,
     name: "React",
   },
   {
-    tagId: Math.random() * 1000,
+    id: Math.random() * 1000,
     name: "Spring",
   },
 ];
 
 const QuestionsPage = () => {
-  const mockQuestion: QuestionType[] = [
-    {
-      title: "Question Title",
-      tags: [
-        {
-          tagId: Math.random() * 1000,
-          name: "C++",
-        },
-        {
-          tagId: Math.random() * 1000,
-          name: "React",
-        },
-        {
-          tagId: Math.random() * 1000,
-          name: "Spring",
-        },
-      ],
-      createdAt: "Sun May 14 2023 20:36:37 ",
-      updatedAt: "Sun May 14 2023 20:36:37 ",
-      creator: creator,
-      description: "CEVA",
-    },
-    {
-      title: "Question Title",
-      tags: [
-        {
-          tagId: Math.random() * 1000,
-          name: "C++",
-        },
-        {
-          tagId: Math.random() * 1000,
-          name: "React",
-        },
-        {
-          tagId: Math.random() * 1000,
-          name: "Spring",
-        },
-      ],
-      createdAt: "Sun May 14 2023 20:36:37 ",
-      updatedAt: "Sun May 14 2023 20:36:37 ",
-      creator: creator,
-      description: "CEVA",
-    },
-    {
-      title: "Question Title",
-      tags: [
-        {
-          tagId: Math.random() * 1000,
-          name: "C++",
-        },
-        {
-          tagId: Math.random() * 1000,
-          name: "React",
-        },
-        {
-          tagId: Math.random() * 1000,
-          name: "Spring",
-        },
-      ],
-      createdAt: "Sun May 14 2023 20:36:37 ",
-      updatedAt: "Sun May 14 2023 20:36:37 ",
-      creator: creator,
-      description: "CEVA",
-    },
-    {
-      title: "Ali baba",
-      tags: [
-        {
-          tagId: Math.random() * 1000,
-          name: "C++",
-        },
-        {
-          tagId: Math.random() * 1000,
-          name: "React",
-        },
-        {
-          tagId: Math.random() * 1000,
-          name: "Spring",
-        },
-      ],
-      createdAt: "Sun May 14 2023 20:36:37 ",
-      updatedAt: "Sun May 14 2023 20:36:37 ",
-      creator: creator,
-      description: "CEVA",
-    },
-  ];
-
-  const userArray: UserType[] = creators;
-
   const [questions, setQuestions] = useState([] as QuestionType[]);
-  const [filteredQuestions, setFilteredQuestions] = useState([]);
+  const [filteredQuestions, setFilteredQuestions] = useState(
+    [] as QuestionType[]
+  );
+  const [tags, setTags] = useState(mockTags);
+  const [users, setUsers] = useState(creators);
   const [loading, setLoading] = useState(false);
   const [isAddQuestionModalOpen, setIsAddQuestionModalOpen] = useState(false);
 
@@ -151,10 +68,21 @@ const QuestionsPage = () => {
       const res = await getAllQuestions();
       setQuestions(res.data);
       setFilteredQuestions(res.data);
+      const resTags = await getAllTags();
+      setTags(resTags.data);
+
+      const resUsers = await getAllUsers();
+      console.log("users---->", resUsers.data);
+      setUsers(resUsers.data);
+
       setLoading(false);
     };
     fetchQuestions();
   }, []);
+
+  useEffect(() => {
+    setFilteredQuestions(questions);
+  }, [questions]);
 
   if (loading) {
     return (
@@ -187,6 +115,8 @@ const QuestionsPage = () => {
       <AddQuestionModal
         handleClose={handleClose}
         isOpen={isAddQuestionModalOpen}
+        questions={questions}
+        setQuestions={setQuestions}
       />
       <Paper elevation={3} style={{ padding: "20px", marginBottom: "20px" }}>
         <Grid container spacing={2}>
@@ -195,7 +125,7 @@ const QuestionsPage = () => {
               questions={questions}
               setCurrentQuestions={setFilteredQuestions}
               tags={tags}
-              users={userArray}
+              users={users}
             />
             <Grid
               item

@@ -9,12 +9,12 @@ import { deleteUser } from "../../../redux/slices/UserSlice";
 
 type Props = {
   item: RouteType;
+  onClick: (value: any) => void;
 };
-const SidebarItem = ({ item }: Props) => {
+const SidebarItem = ({ item, onClick }: Props) => {
   const dispatch = useAppDispatch();
   const { appState } = useSelector((state: RootState) => state.appState);
-  const onClick = () => {
-    console.log("cacaca");
+  const onClickSignOut = () => {
     localStorage.removeItem("token");
     localStorage.setItem("loggedIn", "false");
     dispatch(deleteUser());
@@ -23,8 +23,6 @@ const SidebarItem = ({ item }: Props) => {
   return item.sidebarProps && item.path && item.state === "sign-out" ? (
     //@ts-ignore
     <ListItemButton
-      component={Link}
-      to={item.path}
       sx={{
         "&: hover": {
           backgroundColor: colorConfigs.sidebar.hoverBg,
@@ -34,7 +32,7 @@ const SidebarItem = ({ item }: Props) => {
         paddingY: "12px",
         paddingX: "24px",
       }}
-      onClick={onClick}
+      onClick={onClickSignOut}
     >
       <ListItemIcon
         sx={{
@@ -48,8 +46,6 @@ const SidebarItem = ({ item }: Props) => {
   ) : item.sidebarProps && item.path ? (
     //@ts-ignore
     <ListItemButton
-      component={Link}
-      to={item.path}
       sx={{
         "&: hover": {
           backgroundColor: colorConfigs.sidebar.hoverBg,
@@ -59,6 +55,7 @@ const SidebarItem = ({ item }: Props) => {
         paddingY: "12px",
         paddingX: "24px",
       }}
+      onClick={onClick}
     >
       <ListItemIcon
         sx={{
