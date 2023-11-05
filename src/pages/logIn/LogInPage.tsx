@@ -9,10 +9,10 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { signIn } from "../../services/authApi";
-import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../hooks/hooks";
 import { updateUser } from "../../redux/slices/UserSlice";
 import { getAllUsers } from "../../services/UserApi";
+import { useState } from "react";
 
 const theme = createTheme();
 
@@ -20,19 +20,21 @@ interface SignInProps {
   setToken: (value: any) => void;
 }
 
+const INITIAL_FORM_DATA = {
+  email: "",
+  password: "",
+};
+
 const SignInPage = ({ setToken }: SignInProps) => {
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+
   const dispatch = useAppDispatch();
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const response = await signIn({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    const response = await signIn(formData);
     const status = localStorage.getItem("loggedIn");
     if (status === "true") {
       setToken(localStorage.getItem("token"));
-      console.log("response.data-----?", response);
       const user = response.user;
       delete user.password;
       dispatch(updateUser(user));
@@ -40,8 +42,14 @@ const SignInPage = ({ setToken }: SignInProps) => {
       setToken("");
     }
 
-    const allUsers = await getAllUsers();
-    console.log("allUsers---->", allUsers);
+    await getAllUsers();
+  };
+
+  const handleChange = (name: string, value: string) => {
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
   return (
@@ -77,6 +85,7 @@ const SignInPage = ({ setToken }: SignInProps) => {
               name="email"
               autoComplete="email"
               autoFocus
+              onChange={({ target }) => handleChange(target.name, target.value)}
             />
             <TextField
               margin="normal"
@@ -87,6 +96,7 @@ const SignInPage = ({ setToken }: SignInProps) => {
               type="password"
               id="password"
               autoComplete="current-password"
+              onChange={({ target }) => handleChange(target.name, target.value)}
             />
             <Button
               type="submit"

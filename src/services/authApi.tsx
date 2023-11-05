@@ -1,5 +1,7 @@
-export async function signIn(requestBody: any) {
-  const response = await fetch("http://localhost:8080/auth/signIn", {
+import { LoginDto } from "../types/types";
+
+export async function signIn(requestBody: LoginDto) {
+  const response = await fetch("http://localhost:8080/auth/login", {
     method: "POST",
     headers: new Headers({
       Accept: "application/json",
@@ -11,7 +13,6 @@ export async function signIn(requestBody: any) {
   if (!response.status) {
     localStorage.setItem("token", response.token);
     localStorage.setItem("loggedIn", "true");
-    console.log("token----->", response);
   } else {
     localStorage.setItem("loggedIn", "false");
   }
