@@ -1,11 +1,13 @@
-import React from "react";
-import background from "../../assets/images/stack-overflow-background.png";
+import React, {useEffect, useState} from "react";
+import background from "../../assets/images/light_bulb.png";
 import styled from "styled-components";
-import { Typography, Paper, Grid } from "@mui/material";
+import {Typography, Paper, Grid} from "@mui/material";
 import MediaCard from "../components/MediaCard";
 import questionImage from "../../assets/images/questions.png";
 import usersImage from "../../assets/images/users.jpg";
-import answersImage from "../../assets/images/answers.jpg";
+import colorConfigs from "../../configs/colorConfigs";
+import {getAllUsers} from "../../services/UserApi";
+import {getAllDevices} from "../../services/DevicesApi";
 
 const Container = styled.div`
   height: 100%;
@@ -23,9 +25,9 @@ const Overlay = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  height: 100%;
+  height: 200%;
   width: 100%;
-  background-color: rgba(93, 93, 93, 0.15);
+  background-color: rgba(150, 150, 93, 0.15);
   z-index: 1;
 `;
 
@@ -53,46 +55,53 @@ const Description = styled(Typography)`
 `;
 
 const FullHeightPaper = styled(Paper)`
-  height: 85vh;
+  height: 100vh;
+  z-index: 2;
 `;
 
 const DashboardPageLayout = () => {
-  return (
-    <FullHeightPaper elevation={3}>
-      <Container>
-        <Overlay />
-        <Title variant="h4">Welcome to our knowledge-sharing hub!</Title>
-        <Description variant="body1">
-          Connect, learn, and share with our vibrant tech community. Ask
-          questions, find answers, and explore endless possibilities. Let's
-          innovate together!
-        </Description>
-      </Container>
-      <Grid container spacing={2} justifyContent="center" marginTop={4}>
-        <Grid item>
-          <MediaCard
-            image={usersImage}
-            title="Users"
-            description="Number of users"
-          />
-        </Grid>
-        <Grid item>
-          <MediaCard
-            image={questionImage}
-            title="Questions"
-            description="Number of questions"
-          />
-        </Grid>
-        <Grid item>
-          <MediaCard
-            image={answersImage}
-            title="Answers"
-            description="Number of answers"
-          />
-        </Grid>
-      </Grid>
-    </FullHeightPaper>
-  );
+    const [nrOfUsers, setNrOfUsers] = useState(0);
+    const [nrOfDevices, setNrOfDevices] = useState(0);
+
+    useEffect(() => {
+        (async function() {
+            const users = await getAllUsers();
+            const devices = await getAllDevices();
+            setNrOfUsers(users.length);
+            setNrOfDevices(devices.length);
+        })()
+    }, []);
+    return (
+        <FullHeightPaper elevation={3}>
+            <Overlay/>
+            <Container>
+                <Title variant="h4">Welcome to your Energy Managment System!</Title>
+                <Description variant="body1">
+                    Discover our Energy Management App, the ultimate solution for users to oversee and control energy
+                    consumption across all their devices. Easily monitor, set preferences, and save on energy costs with
+                    real-time insights.
+                </Description>
+            </Container>
+            <Grid container spacing={2} justifyContent="center" marginTop={4} sx={{
+                backgroundColor: colorConfigs.topbar.bg
+            }}>
+                <Grid item>
+                    <MediaCard
+                        image={usersImage}
+                        title="Users"
+                        description={`Number of users: ${nrOfUsers}`}
+                    />
+                </Grid>
+                <Grid item>
+                    <MediaCard
+                        image={questionImage}
+                        title="Devices"
+                        description={`Number of devices: ${nrOfDevices}`}
+                    />
+                </Grid>
+            </Grid>
+        </FullHeightPaper>
+    );
 };
 
 export default DashboardPageLayout;

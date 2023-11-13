@@ -81,7 +81,8 @@ const Vote = ({ question }: VoteProps) => {
   const [count, setCount] = useState(0);
   const [currentUserVoteValue, setCurrentUserVoteValue] = useState(0);
 
-  const currentUser = useAppSelector((state) => state.currentUser);
+  const currentUserState = useAppSelector((state) => state.currentUser);
+  const currentUser = currentUserState.currentUser;
 
   useEffect(() => {
     const fetchNumberOfVotes = async () => {
@@ -93,7 +94,7 @@ const Vote = ({ question }: VoteProps) => {
       }
 
       const currentUserVote = await getVote(
-        currentUser.userId.toString(),
+        currentUser.id.toString(),
         question.id
       );
       if (currentUserVote.data == "") {
@@ -111,7 +112,7 @@ const Vote = ({ question }: VoteProps) => {
 
   const onClickUp = async () => {
     await voteQuestion({
-      userId: currentUser.userId.toString(),
+      userId: currentUser.id.toString(),
       questionId: question.id,
       value: 1,
     });
@@ -120,20 +121,20 @@ const Vote = ({ question }: VoteProps) => {
 
   const onClickDown = async () => {
     await voteQuestion({
-      userId: currentUser.userId.toString(),
+      userId: currentUser.id.toString(),
       questionId: question.id,
       value: -1,
     });
     if (currentUserVoteValue === 1) {
       await voteQuestion({
-        userId: currentUser.userId.toString(),
+        userId: currentUser.id.toString(),
         questionId: question.id,
         value: 0,
       });
       setCurrentUserVoteValue(0);
     } else if (currentUserVoteValue === 0) {
       await voteQuestion({
-        userId: currentUser.userId.toString(),
+        userId: currentUser.id.toString(),
         questionId: question.id,
         value: -1,
       });

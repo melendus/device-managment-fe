@@ -96,7 +96,9 @@ const QuestionPage = () => {
   const navigate = useNavigate();
 
   const currentQuestion = useAppSelector((state) => state.currentQuestion);
-  const currentUser = useAppSelector((state) => state.currentUser);
+  const currentUserState = useAppSelector((state) => state.currentUser);
+  const currentUser = currentUserState.currentUser;
+
 
   useEffect(() => {
     const fetchQuestion = async () => {
@@ -200,7 +202,7 @@ const QuestionPage = () => {
       />
       <Card>
         <ButtonContainer>
-          {(currentUser.userId.toString() === question.user.userId.toString() ||
+          {(currentUser.id.toString() === question.user.userId.toString() ||
             currentUser.role === "admin") && (
             <>
               <Button
@@ -237,7 +239,7 @@ const QuestionPage = () => {
         <CardHeader
           avatar={
             <>
-              {currentUser.userId.toString() !==
+              {currentUser.id.toString() !==
               question.user.userId.toString() ? (
                 <Vote question={question} />
               ) : (
@@ -302,7 +304,7 @@ const QuestionPage = () => {
                 }}
               >
                 <>
-                  {currentUser.userId.toString() !==
+                  {currentUser.id.toString() !==
                   question.user.userId.toString() ? (
                     <VoteAnswer answer={answer} />
                   ) : (
@@ -348,7 +350,7 @@ const QuestionPage = () => {
                     }}
                     onClick={() => handleImageClickAny(answer.picture)}
                   />
-                  {(currentUser.userId.toString() ===
+                  {(currentUser.id.toString() ===
                     answer.user.userId.toString() ||
                     currentUser.role === "admin") && (
                     <>

@@ -23,40 +23,32 @@ export interface AddAnswerType {
 }
 
 export interface UserType {
-  userId: Number;
+  id: number;
 
   firstName: string;
   lastName: string;
   role: string;
-  createdAt?: Date;
   email: string;
-  phoneNumber?: string;
-  score?: number;
-  banned?: boolean;
-  votes?: [];
 }
 
-export interface QuestionTypeSearchBar {
-  title: string;
-  description: string;
-  tags: TagType[];
-  createdAt: string;
-  updatedAt: string;
-  creator: {
-    id: Number;
-    firstName: string;
-    lastName: string;
-    role: string;
-    createdAt?: Date;
-    email: string;
-    phoneNumber?: string;
-    score?: number;
-    banned?: boolean;
-    votes?: [];
-  };
-  id: number;
-}
 export interface TagType {
   id: Number;
   name: string;
+}
+
+export type OptionsRowButton = {
+  optionName: string;
+  optionLogo?: React.ReactElement;
+  optionOnClick: (item: any) => void;
+  isRed?: boolean;
+  optionDisabled?: boolean;
+};
+
+export interface Device {
+  name: string;
+  id: number;
+  description: string;
+  address: string;
+  energyConsumptionPerHour: number;
+  userId: number;
 }

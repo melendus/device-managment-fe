@@ -13,8 +13,6 @@ import {
 import sizeConfigs from "../../../configs/sizeConfigs";
 import colorConfigs from "../../../configs/colorConfigs";
 import assets from "../../../assets";
-import appRoutes from "../../../routes/appRoutes";
-import SidebarItem from "./SidebarItem";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
@@ -22,9 +20,8 @@ import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import QuestionAnswerOutlinedIcon from "@mui/icons-material/QuestionAnswerOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import { useAppDispatch } from "../../../hooks/hooks";
-import { deleteUser } from "../../../redux/slices/UserSlice";
-
+import { useAppDispatch, useAppSelector } from "../../../hooks/hooks";
+import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 interface SidebarNavProps {
   setToken: (value: string) => void;
 }
@@ -34,6 +31,9 @@ const SidebarNav = ({ setToken }: SidebarNavProps) => {
   const { appState } = useSelector((state: RootState) => state.appState);
   const dispatch = useAppDispatch();
 
+  const currentUserState = useAppSelector((state) => state.currentUser);
+  const currentUser = currentUserState.currentUser;
+
   const handleClick = (route: any) => {
     navigate(route);
   };
@@ -42,7 +42,7 @@ const SidebarNav = ({ setToken }: SidebarNavProps) => {
     localStorage.clear();
     setToken("");
     navigate("/");
-    dispatch(deleteUser());
+    // dispatch(deleteUser());
   };
 
   return (
@@ -100,50 +100,79 @@ const SidebarNav = ({ setToken }: SidebarNavProps) => {
                 Dashboard
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={{
-                  "&: hover": {
-                    backgroundColor: colorConfigs.sidebar.hoverBg,
-                  },
-                  backgroundColor: colorConfigs.sidebar.bg,
-                  paddingY: "12px",
-                  paddingX: "24px",
-                }}
-                onClick={() => handleClick("/questions")}
-              >
-                <ListItemIcon
+            {currentUser.role === "admin" && (
+              <ListItem disablePadding sx={{ display: "block" }}>
+                <ListItemButton
                   sx={{
-                    color: colorConfigs.sidebar.color,
+                    "&: hover": {
+                      backgroundColor: colorConfigs.sidebar.hoverBg,
+                    },
+                    backgroundColor: colorConfigs.sidebar.bg,
+                    paddingY: "12px",
+                    paddingX: "24px",
                   }}
+                  onClick={() => handleClick("/devices")}
                 >
-                  <QuestionAnswerOutlinedIcon />
-                </ListItemIcon>
-                Questions
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={{
-                  "&: hover": {
-                    backgroundColor: colorConfigs.sidebar.hoverBg,
-                  },
-                  backgroundColor: colorConfigs.sidebar.bg,
-                  paddingY: "12px",
-                  paddingX: "24px",
-                }}
-                onClick={() => handleClick("/profiles")}
-              >
-                <ListItemIcon
+                  <ListItemIcon
+                    sx={{
+                      color: colorConfigs.sidebar.color,
+                    }}
+                  >
+                    <PhoneIphoneIcon />
+                  </ListItemIcon>
+                  Devices
+                </ListItemButton>
+              </ListItem>
+            )}
+            {currentUser.role === "user" && (
+              <ListItem disablePadding sx={{ display: "block" }}>
+                <ListItemButton
                   sx={{
-                    color: colorConfigs.sidebar.color,
+                    "&: hover": {
+                      backgroundColor: colorConfigs.sidebar.hoverBg,
+                    },
+                    backgroundColor: colorConfigs.sidebar.bg,
+                    paddingY: "12px",
+                    paddingX: "24px",
                   }}
+                  onClick={() => handleClick("/devices")}
                 >
-                  <AccountCircleOutlinedIcon />
-                </ListItemIcon>
-                Profiles
-              </ListItemButton>
-            </ListItem>
+                  <ListItemIcon
+                    sx={{
+                      color: colorConfigs.sidebar.color,
+                    }}
+                  >
+                    <PhoneIphoneIcon />
+                  </ListItemIcon>
+                  My Devices
+                </ListItemButton>
+              </ListItem>
+            )}
+            {currentUser.role === "admin" && (
+              <ListItem disablePadding sx={{ display: "block" }}>
+                <ListItemButton
+                  sx={{
+                    "&: hover": {
+                      backgroundColor: colorConfigs.sidebar.hoverBg,
+                    },
+                    backgroundColor: colorConfigs.sidebar.bg,
+                    paddingY: "12px",
+                    paddingX: "24px",
+                  }}
+                  onClick={() => handleClick("/users")}
+                >
+                  <ListItemIcon
+                    sx={{
+                      color: colorConfigs.sidebar.color,
+                    }}
+                  >
+                    <AccountCircleOutlinedIcon />
+                  </ListItemIcon>
+                  Users
+                </ListItemButton>
+              </ListItem>
+            )}
+
             <ListItem disablePadding sx={{ display: "block" }}>
               <ListItemButton
                 sx={{

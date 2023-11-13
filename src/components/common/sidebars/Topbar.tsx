@@ -20,7 +20,7 @@ const Topbar = () => {
       }}
     >
       <Toolbar>
-        <Typography variant="h6">StackOverflow</Typography>
+        <Typography variant="h6">Energy Managment System</Typography>
       </Toolbar>
     </AppBar>
   );

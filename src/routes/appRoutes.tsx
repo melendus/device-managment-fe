@@ -3,7 +3,7 @@ import React from "react";
 import DashboardPageLayout from "../pages/dashboard/DashboardPageLayout";
 
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
-import QuestionsPage from "../pages/questions/QuestionsPage";
+import DevicesPage from "../pages/questions/DevicesPage";
 import QuestionAnswerOutlinedIcon from "@mui/icons-material/QuestionAnswerOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import UserProfilePage from "../pages/userProfile/UserProfilePage";
@@ -23,7 +23,7 @@ const appRoutes: RouteType[] = [
   },
   {
     path: "/questions",
-    element: <QuestionsPage />,
+    element: <DevicesPage />,
     state: "questions",
     sidebarProps: {
       displayText: "Questions",
@@ -31,11 +31,11 @@ const appRoutes: RouteType[] = [
     },
   },
   {
-    path: "/profiles",
+    path: "/users",
     element: <UserProfilesPage />,
-    state: "profiles",
+    state: "users",
     sidebarProps: {
-      displayText: "Profiles",
+      displayText: "Users",
       icon: <AccountCircleOutlinedIcon />,
     },
   },

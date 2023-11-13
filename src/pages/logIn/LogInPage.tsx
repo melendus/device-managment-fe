@@ -10,7 +10,7 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { signIn } from "../../services/authApi";
 import { useAppDispatch } from "../../hooks/hooks";
-import { updateUser } from "../../redux/slices/UserSlice";
+import { updateCurrentUser } from "../../redux/slices/UserSlice";
 import { getAllUsers } from "../../services/UserApi";
 import { useState } from "react";
 
@@ -37,7 +37,7 @@ const SignInPage = ({ setToken }: SignInProps) => {
       setToken(localStorage.getItem("token"));
       const user = response.user;
       delete user.password;
-      dispatch(updateUser(user));
+      dispatch(updateCurrentUser(user));
     } else {
       setToken("");
     }

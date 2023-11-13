@@ -4,7 +4,6 @@ import Topbar from "../common/sidebars/Topbar";
 import sizeConfigs from "../../configs/sizeConfigs";
 import colorConfigs from "../../configs/colorConfigs";
 import { Outlet } from "react-router-dom";
-import Sidebar from "../common/sidebars/Sidebar";
 import SidebarNav from "../common/sidebars/SidebarNav";
 
 interface MainLayoutProps {
@@ -29,8 +28,7 @@ const MainLayout = ({ setToken }: MainLayoutProps) => {
           flexGrow: 1,
           p: 3,
           width: `100%`,
-          minHeight: "100vh",
-          backgroundColor: colorConfigs.mainBg,
+          minHeight: "100%",
         }}
       >
         <Toolbar />

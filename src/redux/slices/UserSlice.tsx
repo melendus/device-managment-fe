@@ -1,31 +1,33 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { UserType } from "../../components/common/types/DataTypes";
 
-const initialState: UserType = {
-  userId: -1,
-  role: "",
-  email: "",
-  firstName: "",
-  lastName: "",
-  phoneNumber: "",
-  score: -1,
-  banned: false,
-  votes: [],
+const initialState = {
+  currentUser: {
+    id: -1,
+    role: "",
+    email: "",
+    firstName: "",
+    lastName: "",
+  } as UserType,
+  currentUsers: [] as UserType[],
 };
 
 export const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    updateUser(state, action) {
-      return action.payload;
+    updateCurrentUser: (state, action) => {
+      state.currentUser = action.payload;
     },
-    deleteUser(state) {
-      return initialState;
+    updateCurrentUsers: (state, action) => {
+      state.currentUsers = action.payload;
+    },
+    deleteUser: (state) => {
+      state.currentUser = initialState.currentUser;
     },
   },
 });
 
-export const { updateUser, deleteUser } = userSlice.actions;
+export const { updateCurrentUser, updateCurrentUsers, deleteUser } = userSlice.actions;
 
 export default userSlice.reducer;

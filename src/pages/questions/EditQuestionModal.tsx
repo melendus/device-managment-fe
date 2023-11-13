@@ -82,7 +82,7 @@ const EditQuestionModal = ({
     newQuestion.description = questionToBeAdded.description;
     newQuestion.picture = questionToBeAdded.picture;
     await updateQuestionById({
-      id: currentUser.userId,
+      id: currentUser.currentUser.id,
       ...newQuestion,
     });
 

@@ -7,15 +7,15 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { Device, UserType } from "../../components/common/types/DataTypes";
+import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
+import styled from "styled-components";
 import {
-  AddQuestionType,
-  QuestionType,
-} from "../../components/common/types/DataTypes";
-// @ts-ignore
-import FileBase64 from "react-file-base64";
-import { useAppSelector } from "../../hooks/hooks";
-import { saveQuestion } from "../../services/QuestionApi";
-import { addTags, getAllTags } from "../../services/TagApi";
+  createDevice,
+  deleteDevice,
+  updateDevice,
+} from "../../services/DevicesApi";
+import { updateCurrentDevices } from "../../redux/slices/DeviceSlice";
 
 const style = {
   position: "absolute" as "absolute",
@@ -28,77 +28,162 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
+
+const ButtonsContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+`;
 interface AddQuestionProps {
   handleClose: () => void;
   isOpen: boolean;
-  questions: QuestionType[];
-  setQuestions: React.Dispatch<React.SetStateAction<QuestionType[]>>;
+  deviceToUpdate?: Device;
+  isUpdate?: boolean;
 }
 
-const mockTags: string[] = ["C++", "React", "Spring"];
+const initialFormData = {
+  name: "",
+  description: "",
+  address: "",
+  energyConsumptionPerHour: Number.NaN,
+  userId: -1,
+};
 
 const AddQuestionModal = ({
   handleClose,
   isOpen,
-  questions,
-  setQuestions,
+  deviceToUpdate,
+  isUpdate,
 }: AddQuestionProps) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [picture, setPicture] = useState("");
-  const [tags, setTags] = useState(mockTags);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const currentUser = useAppSelector((state) => state.currentUser);
+  const [formData, setFormData] = useState(initialFormData);
+  const [selectedUser, setSelectedUser] = useState<UserType | null>();
+  const currentUserState = useAppSelector((state) => state.currentUser);
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [formErrors, setFormErrors] = useState<
+    Partial<Record<keyof typeof initialFormData, string>>
+  >({});
+
+  const devicesState = useAppSelector((state) => state.devices);
+
+  const dispatch = useAppDispatch();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const questionToBeAdded: AddQuestionType = {
-      title,
-      description,
-      picture,
-    };
 
-    const returnedQuestion = await saveQuestion({
-      userId: currentUser.userId,
-      ...questionToBeAdded,
-    });
+    const errors: Partial<Record<keyof typeof initialFormData, string>> = {};
+    for (const key in formData) {
+      if (
+        (formData[key as keyof typeof initialFormData] === "" ||
+          formData[key as keyof typeof initialFormData] === null) &&
+        key !== "userId"
+      ) {
+        errors[key as keyof typeof initialFormData] = "This field is required";
+      }
+    }
 
-    returnedQuestion.data.tags = await addTags({
-      tags: selectedTags,
-      questionId: returnedQuestion.data.id,
-    });
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
 
-    setQuestions([returnedQuestion.data, ...questions]);
+    const deviceData =
+      formData.userId === -1
+        ? {
+            ...formData,
+            userId: undefined,
+          }
+        : {
+            ...formData,
+            userId: selectedUser !== undefined ? selectedUser?.id : undefined,
+          };
+
+    const { data: addedDevice } = await createDevice(deviceData);
+
+    dispatch(
+      updateCurrentDevices([...devicesState.currentDevices, addedDevice])
+    );
+
     handleClose();
   };
 
-  const renderTag = (tag: any) => {
-    if (tag !== null) {
-      return tag;
-    } else {
-      return "";
+  const handleUpdateDevice = async () => {
+    const deviceData =
+      formData.userId === -1
+        ? {
+            ...formData,
+            userId: undefined,
+          }
+        : {
+            ...formData,
+            userId: selectedUser !== undefined ? selectedUser?.id : undefined,
+          };
+
+    if (deviceToUpdate) {
+      const { data: updatedDeviceData } = await updateDevice(
+        deviceToUpdate?.id.toString(),
+        deviceData
+      );
+
+      const deviceIndex = devicesState.currentDevices.findIndex(
+        (device) => device.id === deviceToUpdate.id
+      );
+
+      if (deviceIndex !== -1) {
+        const updatedDevices = [...devicesState.currentDevices];
+        updatedDevices[deviceIndex] = updatedDeviceData;
+        dispatch(updateCurrentDevices(updatedDevices));
+      }
+    }
+    handleClose();
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    setFormErrors({ ...formErrors, [name]: "" });
+  };
+
+  const renderUserName = (user: UserType) => {
+    return `${user.firstName} ${user.lastName}`;
+  };
+
+  const handleSelectedUserChange = (value: UserType | null) => {
+    if (value?.id) {
+      setFormData({
+        ...formData,
+        userId: value?.id,
+      });
+      setSelectedUser(value);
     }
   };
 
-  const handleChangeDropdownTag = (
-    event: React.ChangeEvent<{}>,
-    newValue: any
-  ) => {
-    setSelectedTags(newValue);
+  const handleDeleteDevice = async () => {
+    if (isUpdate && deviceToUpdate) {
+      await deleteDevice(deviceToUpdate.id.toString());
+
+      const updatedDevices = devicesState.currentDevices.filter(
+        (device) => device.id !== deviceToUpdate.id
+      );
+
+      dispatch(updateCurrentDevices(updatedDevices));
+      handleClose();
+    }
   };
 
   useEffect(() => {
-    const fetchTags = async () => {
-      const res = await getAllTags();
-      let tags;
-      if (res.data !== "") {
-        tags = res.data.map((tag: any) => tag.name);
-      }
-
-      setTags(tags);
-    };
-    fetchTags();
+    setUsers(currentUserState.currentUsers);
   }, []);
+
+  useEffect(() => {
+    setFormErrors({});
+    if (!isUpdate) {
+      setFormData(initialFormData);
+    } else {
+      if (deviceToUpdate) {
+        setFormData(deviceToUpdate);
+      }
+    }
+  }, [isOpen]);
 
   return (
     <Modal
@@ -109,51 +194,105 @@ const AddQuestionModal = ({
     >
       <Box sx={style}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
-          Add question
+          {isUpdate ? "Device Description!" : "Add Device!"}
         </Typography>
         <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-          Please fill the information for your question!
+          Please fill the information for the device!
         </Typography>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            fullWidth
-            required
-            sx={{ mt: 2 }}
-          />
-          <TextField
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            fullWidth
-            multiline
-            required
-            sx={{ mt: 2 }}
-          />
-          <Autocomplete
-            sx={{ flexGrow: "1", mt: 2, mb: 2 }}
-            options={tags}
-            getOptionLabel={(option) => renderTag(option)}
-            multiple
-            freeSolo
-            value={selectedTags}
-            onChange={handleChangeDropdownTag}
-            renderInput={(params) => (
-              <TextField {...params} label="Tags" variant="outlined" />
-            )}
-          />
-          <div style={{ paddingBottom: "5px" }}>
-            <FileBase64
-              multiple={false}
-              onDone={({ base64 }: any) => setPicture(base64)}
+        <TextField
+          variant="outlined"
+          label="Name"
+          name="name"
+          value={formData.name}
+          onChange={handleInputChange}
+          fullWidth
+          required
+          sx={{ mt: 2 }}
+          error={!!formErrors.name}
+          helperText={formErrors.name}
+        />
+        <TextField
+          label="Description"
+          variant="outlined"
+          name="description"
+          value={formData.description}
+          onChange={handleInputChange}
+          fullWidth
+          multiline
+          required
+          sx={{ mt: 2 }}
+          error={!!formErrors.description}
+          helperText={formErrors.description}
+        />
+        <TextField
+          label="Address"
+          variant="outlined"
+          name="address"
+          value={formData.address}
+          onChange={handleInputChange}
+          fullWidth
+          required
+          sx={{ mt: 2 }}
+          error={!!formErrors.address}
+          helperText={formErrors.address}
+        />
+        <TextField
+          label="Energy Consumption"
+          variant="outlined"
+          name="energyConsumptionPerHour"
+          value={formData.energyConsumptionPerHour}
+          onChange={handleInputChange}
+          fullWidth
+          required
+          sx={{ mt: 2 }}
+          type="number"
+          inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+          error={!!formErrors.energyConsumptionPerHour}
+          helperText={formErrors.energyConsumptionPerHour}
+        />
+        <Autocomplete
+          sx={{ flexGrow: "1", mt: 2, mb: 2 }}
+          options={users}
+          getOptionLabel={(user) => renderUserName(user)}
+          value={selectedUser}
+          onChange={(event, newValue) => {
+            handleSelectedUserChange(newValue);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="User"
+              variant="outlined"
+              name="user"
             />
-          </div>
-          <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+          )}
+        />
+        <ButtonsContainer>
+          <Button
+            type="submit"
+            variant="outlined"
+            sx={{ mt: 2 }}
+            onClick={handleClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="outlined"
+            sx={{ mt: 2 }}
+            onClick={handleDeleteDevice}
+          >
+            Delete
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{ mt: 2 }}
+            onClick={isUpdate ? handleUpdateDevice : handleSubmit}
+          >
             Submit
           </Button>
-        </form>
+        </ButtonsContainer>
       </Box>
     </Modal>
   );

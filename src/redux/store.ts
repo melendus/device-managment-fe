@@ -5,6 +5,8 @@ import storage from "redux-persist/lib/storage";
 import userReducer from "../redux/slices/UserSlice";
 import questionReducer from "../redux/slices/QuestionSlice";
 import clickUserReducer from "../redux/slices/ClickedUserSlice";
+import clickDeviceReducer from "../redux/slices/ClickedDeviceSlice";
+import deviceReducer from "../redux/slices/DeviceSlice";
 
 const persistConfig = {
   key: "root",
@@ -23,6 +25,8 @@ export const store = configureStore({
     currentUser: persistReducerCurrentUser,
     currentQuestion: persistReducerCurrentQuestion,
     clickedUser: clickUserReducer,
+    clickedDevice: clickDeviceReducer,
+    devices: deviceReducer,
   },
 });
 

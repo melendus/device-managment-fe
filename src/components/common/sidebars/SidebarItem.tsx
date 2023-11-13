@@ -12,12 +12,12 @@ type Props = {
   onClick: (value: any) => void;
 };
 const SidebarItem = ({ item, onClick }: Props) => {
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   const { appState } = useSelector((state: RootState) => state.appState);
   const onClickSignOut = () => {
     localStorage.removeItem("token");
     localStorage.setItem("loggedIn", "false");
-    dispatch(deleteUser());
+    // dispatch(deleteUser());
   };
 
   return item.sidebarProps && item.path && item.state === "sign-out" ? (

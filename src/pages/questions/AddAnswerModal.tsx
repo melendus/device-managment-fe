@@ -40,9 +40,10 @@ const AddAnswerModal = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [picture, setPicture] = useState("");
-  const currentUser = useAppSelector((state) => state.currentUser);
+  const currentUserState = useAppSelector((state) => state.currentUser);
   const currentQuestion = useAppSelector((state) => state.currentQuestion);
 
+  const currentUser = currentUserState.currentUser;
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const answerToBeAdded: AddAnswerType = {
@@ -57,16 +58,9 @@ const AddAnswerModal = ({
       picture: answerToBeAdded.picture,
     };
 
-    console.log(
-      "ceva---->",
-      currentQuestion.id.toString(),
-      currentUser.userId.toString(),
-      newAnswer
-    );
-
     const returnedAnswer = await addQuestionAnswer(
       currentQuestion.id.toString(),
-      currentUser.userId.toString(),
+      currentUser.id.toString(),
       newAnswer
     );
 

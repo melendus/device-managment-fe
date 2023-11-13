@@ -9,7 +9,6 @@ export const questionSlice = createSlice({
   initialState,
   reducers: {
     updateQuestion(state, action) {
-      console.log("actionPayload---->", action.payload);
       return action.payload;
     },
     deleteQuestion(state) {

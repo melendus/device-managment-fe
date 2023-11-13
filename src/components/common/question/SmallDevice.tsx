@@ -9,9 +9,11 @@ import { Chip, Grid, IconButton, Stack } from "@mui/material";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { useNavigate } from "react-router";
 import styled from "styled-components";
-import { QuestionType } from "../types/DataTypes";
+import { Device, QuestionType, UserType } from "../types/DataTypes";
 import { useAppDispatch } from "../../../hooks/hooks";
 import { updateQuestion } from "../../../redux/slices/QuestionSlice";
+import { useEffect, useState } from "react";
+import { findOneUser } from "../../../services/UserApi";
 
 const Header = styled.h1`
   font-size: 20px;
@@ -31,35 +33,45 @@ const QuestionScoreContainer = styled.div`
 `;
 
 interface QuestionProps {
-  question: QuestionType;
+  device: Device;
+  setDeviceToUpdate: (device: Device) => void;
+  setIsUpdate: (update: boolean) => void;
+  setIsOpen: (open: boolean) => void;
+  showOptions: boolean;
 }
 
-const questionScore = 50;
+const INITIAL_USER: UserType = {
+  id: -1,
+  firstName: "",
+  lastName: "",
+  role: "",
+  email: "",
+};
 
-const SmallQuestion = ({ question }: QuestionProps) => {
+const SmallDevice = ({
+  device,
+  setDeviceToUpdate,
+  setIsUpdate,
+  setIsOpen,
+  showOptions,
+}: QuestionProps) => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
 
-  const onClickHandle = () => {
-    dispatch(
-      updateQuestion({
-        id: question.id,
-      })
-    );
-    navigate("/question");
-  };
+  const [allocatedUser, setAllocatedUser] = useState<any>(INITIAL_USER);
 
-  const date = new Date(question.createdAt);
+  useEffect(() => {
+    (async function () {
+      if (device.userId !== null) {
+        const { data: foundUser } = await findOneUser(device.userId.toString());
+        setAllocatedUser(foundUser);
+      }
+    })();
+  }, [device]);
 
   return (
     <Card style={{ width: "100%", overflow: "visible", marginBottom: "10px" }}>
       <CardContent>
         <Grid container alignItems="center" spacing={2}>
-          <Grid item>
-            <QuestionScoreContainer>
-              <Header>{questionScore}</Header>
-            </QuestionScoreContainer>
-          </Grid>
           <Grid item xs>
             <CardHeader
               avatar={
@@ -68,40 +80,42 @@ const SmallQuestion = ({ question }: QuestionProps) => {
                     sx={{ backgroundColor: red[500] }}
                     aria-label="question"
                   >
-                    {question.creator.firstName.charAt(0)}
+                    {device.name.charAt(0)}
                   </Avatar>
                 </HeaderContainer>
               }
               action={
-                <IconButton aria-label="settings" onClick={onClickHandle}>
+                <IconButton
+                  aria-label="settings"
+                  onClick={() => {
+                    setDeviceToUpdate(device);
+                    setIsOpen(true);
+                    setIsUpdate(true);
+                  }}
+                  disabled={showOptions}
+                >
                   <KeyboardArrowRightIcon />
                 </IconButton>
               }
               titleTypographyProps={{ variant: "h5" }}
-              title={question.title}
-              subheader={
-                <>
-                  {date.toLocaleDateString()} | Author:{"  "}
-                  {question.creator.firstName}
-                </>
-              }
+              title={device.name}
+              subheader={<>Address: {device.address}</>}
               sx={{
                 padding: "16px 16px 16px 0",
               }}
             />
 
             <Typography variant="body2" color="text.secondary">
-              {question.description}
+              {device.description}
             </Typography>
-            <Stack
-              direction="row"
-              spacing={1}
-              style={{ marginTop: "15px", marginBottom: "5px" }}
-            >
-              {question.tags.map((tag, index) => (
-                <Chip label={tag.name} key={index} />
-              ))}
-            </Stack>
+            <Typography variant="body2" color="text.secondary">
+              <b>Energy Consumption per Hour:</b>{" "}
+              {device.energyConsumptionPerHour}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <b>Allocated User:</b>{" "}
+              {`${allocatedUser.firstName} ${allocatedUser.lastName}`}
+            </Typography>
           </Grid>
         </Grid>
       </CardContent>
@@ -109,4 +123,4 @@ const SmallQuestion = ({ question }: QuestionProps) => {
   );
 };
 
-export default SmallQuestion;
+export default SmallDevice;
